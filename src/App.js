@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import SearchBar from './components/SearchBar'; //Komponent SearchBar
+import SearchBar from './components/SearchBar'; // Komponent SearchBar
+import WeatherForecast from './components/WeatherForecast'; // Nowy komponent
 import './App.css'; // Globalne Style 
 
 // Klucz API z OpenWeather!
-const API_KEY = 'Klucz Api'; 
+const API_KEY = '4d4797b18cd0225f3d49762b87f7a913'; 
 
 // Lokalny cache na zapisane miasta i ich współrzędne
 const cityCache = {}; 
@@ -38,7 +39,7 @@ function App() {
       throw err;
     }
   };
-  
+
   // Funkcja pobierająca dane pogodowe (One Call API) na podstawie współrzędnych
   const fetchWeatherData = async (lat, lon) => {
     try {
@@ -56,7 +57,7 @@ function App() {
       throw err;
     }
   };
-  
+
   // Funkcja obsługująca kliknięcie "Szukaj" w SearchBar
   const handleSearch = async (city) => {
     setError('');  // czyszczenie poprzednich błędów
@@ -65,19 +66,19 @@ function App() {
       console.log(`Szukam miasta: ${city}`);
 
       let lat, lon;
-      // Caching współrzędnych miast - oszczedzanie Api 
-      if (cityCache[city]){
+      // Caching współrzędnych miast - oszczędzanie API 
+      if (cityCache[city]) {
         console.log('Miasto znalezione w cache.');
-        ({lat, lon} = cityCache[city]);
-      }else{
-        const safeCity = sanitizeCityName(city)
+        ({ lat, lon } = cityCache[city]);
+      } else {
+        const safeCity = sanitizeCityName(city);
         const coords = await fetchCoordinates(city);
         lat = coords.lat;
         lon = coords.lon;
-        cityCache[city] = {lat, lon};
-        console.log("Miasto zapisane do cache.");
+        cityCache[city] = { lat, lon };
+        console.log('Miasto zapisane do cache.');
       }
-      
+
       console.log(`Współrzędne dla ${city}: lat=${lat}, lon=${lon}`);
       const weather = await fetchWeatherData(lat, lon);
       console.log('Otrzymane dane pogodowe:', weather);
@@ -89,23 +90,34 @@ function App() {
   };
 
   return (
-    <div className="App" style={{ padding: '20px', textAlign: 'center' }}>
-      <h1 style={{ textAlign: 'center', margin: '20px' }}>Weather App</h1>
-      <SearchBar onSearch={handleSearch} />
-      
-       {/* Wyświetlanie błędu */}
-      {error && <div style={{ color: 'red', marginTop: '20px' }}>{error}</div>}
+    <div className="App">
+      {/* Górny pasek - SearchBar */}
+      <div className="bg-blue-500 p-4">
+        <h1 className="text-white text-2xl font-bold text-center">Weather App</h1>
+        <SearchBar onSearch={handleSearch} />
+      </div>
 
-      {/* Wyświetlanie danych pogodowych */}
-      {weatherData && (
-        <div style={{ marginTop: '20px', textAlign: 'left', maxWidth: '600px', margin: '20px auto' }}>
+      {/* Wyświetlanie błędu */}
+      {error && <div className="text-red-500 text-center mt-4">{error}</div>}
+
+        {/* Wyświetlanie danych pogodowych */}
+        {weatherData && (
+        <div style={{ marginTop: '20px', textAlign: 'left', maxWidth: '', margin: '20px auto' }}>
           <h2>Aktualna pogoda:</h2>
           <pre>{JSON.stringify(weatherData.current, null, 2)}</pre>
 
-          <h2>Prognoza na 3 dni:</h2>
-          <pre>{JSON.stringify(weatherData.daily.slice(0, 3), null, 2)}</pre>
+           {/* Sekcja 3-dniowej Prognozy */}
+           <div className="mt-8">
+            <h2 className="text-xl font-semibold text-center mb-4">Prognoza na 3 dni</h2>
+            <WeatherForecast forecast={weatherData.daily.slice(0, 3)} />
+          </div>
         </div>
-      )}
+     )}
+
+      {/* Dolny pasek */}
+      <div className="bg-blue-500 p-4 mt-8">
+        <p className="text-white text-center">© 2025 Weather App</p>
+      </div>
     </div>
   );
 }
