@@ -117,7 +117,7 @@ function App() {
           {/* Prognoza na 3 dni */}
           <div className="mt-8">
             <h2 className="text-xl font-semibold text-center mb-4">Prognoza na 3 dni</h2>
-            <WeatherForecast forecast={weatherData.daily.slice(0, 3)} />
+            <WeatherForecast forecast={weatherData.daily} />
           </div>
         </div>
       )}
