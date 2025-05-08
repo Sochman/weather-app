@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* App.css */
+
+/* Ogólny kontener aplikacji */
+.app {
+  font-family: Arial, sans-serif;
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Nagłówek */
+.header {
+  background-color: #005478; /* Tailwind blue-500 */
+  padding: 16px;
+  text-align: center;
+}
+
+.header__title {
+  color: white;
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+/* Komunikat błędu */
+.error-message {
+  color: #EF4444; /* Tailwind red-500 */
+  text-align: center;
+  margin-top: 16px;
+}
+
+/* Główna zawartość */
+.main {
+  margin-top: 32px;
+}
+
+/* Sekcja pogody */
+.section {
+  margin-top: 32px;
+}
+
+.section__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Stopka */
+.footer {
+  background-color: #005478;
+  padding: 16px;
+  margin-top: 32px;
+  text-align: center;
+}
+
+.footer__text {
+  color: white;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .current-weather {
+    flex-direction: column;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .current-weather__info {
+    align-items: center;
+  }
+
+  .weather-icon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .weather-forecast-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+    justify-items: center;
+  }
+
+  .weather-forecast-container {
+    padding: 16px;
+  }
+}
+
