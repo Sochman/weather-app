@@ -34,10 +34,6 @@ function SearchBar({ onSearch }) {
       return;
     }
 
-    if (!cities.some((c) => c.toLowerCase() === city.toLowerCase())) {
-      setError('Nie znaleziono takiego miasta.');
-      return;
-    }
     onSearch(city); // Przekazanie poprawnego miasta do App.jsx
     setCity(''); // Wyczyszczenie inputa
     setSuggestions([]); // Wyczyszczenie sugestii

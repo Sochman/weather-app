@@ -8,5 +8,5 @@ export const cities = [
   "Tarnowskie Góry", "Piła", "Biała Podlaska", "Świdnica", "Siemianowice Śląskie", "Oświęcim", "Ostrowiec Świętokrzyski", "Pabianice", "Zgierz", "Starachowice",
   "Wejherowo", "Krosno", "Kutno", "Świętochłowice", "Żory", "Tczew", "Świnoujście", "Ciechanów", "Łomża", "Legionowo",
   "Olkusz", "Skierniewice", "Ełk", "Mielec", "Tomaszów Mazowiecki", "Nowy Dwór Mazowiecki", "Kartuzy", "Knurów", "Kołobrzeg", "Żyrardów",
-  "Chelm", "Malbork", "Śrem", "Police", "Ostrołęka", "Skarżysko-Kamienna", "Augustów", "Piekary Śląskie", "Dębica", "Nysa"
+  "Chelm", "Malbork", "Śrem", "Police", "Ostrołęka", "Skarżysko-Kamienna", "Augustów", "Piekary Śląskie", "Dębica", "Nysa", "Cieszyn"
 ];
