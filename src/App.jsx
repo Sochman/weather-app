@@ -1,29 +1,32 @@
+// src/App.jsx (zaktualizowany)
 import { useState } from 'react';
-import SearchBar from './components/SearchBar'; // Komponent SearchBar
-import WeatherForecast from './components/WeatherForecast'; // Nowy komponent
-import './App.css'; // Globalne Style 
+import SearchBar from './components/SearchBar';  // Komponent wyszukiwarki miast
+import WeatherForecast from './components/WeatherForecast';  // Komponent prognozy pogody
+import CurrentWeather from './components/CurrentWeather';    // **Nowy** komponent bieżącej pogody
+import './App.css'; // Globalne style (Tailwind CSS i podstawowe ustawienia)
 
-// Klucz API z OpenWeather!
-const API_KEY = '4d4797b18cd0225f3d49762b87f7a913'; 
+/** Klucz API OpenWeatherMap */
+const API_KEY = '4d4797b18cd0225f3d49762b87f7a913';
 
-// Lokalny cache na zapisane miasta i ich współrzędne
-const cityCache = {}; 
+/** Lokalny cache zapamiętujący współrzędne już wyszukanych miast (aby ograniczyć zapytania) */
+const cityCache = {};
 
-// Funkcja oczyszczająca input miasta (zabezpieczenie przed dziwnymi znakami)
+/** Funkcja sanitizująca nazwę miasta (usuwa niedozwolone znaki) */
 const sanitizeCityName = (name) => {
   return name.replace(/[^a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ \-]/g, '').trim();
 };
 
 function App() {
-  // Stan na dane pogodowe i błędy
-  const [weatherData, setWeatherData] = useState(null);
-  const [error, setError] = useState('');
+  // Stany aplikacji
+  const [weatherData, setWeatherData] = useState(null); // dane pogodowe (aktualne + prognoza)
+  const [cityName, setCityName] = useState(''); // aktualnie wybrana lokalizacja (nazwa miasta)
+  const [error, setError] = useState(''); // komunikat błędu (jeśli wystąpi)
 
-  // Funkcja pobierająca współrzędne (lat, lon) na podstawie nazwy miasta
+  // Funkcja pobierająca współrzędne (lat, lon) na podstawie nazwy miasta (OpenWeather Geocoding API)
   const fetchCoordinates = async (city) => {
     try {
       const response = await fetch(
-        `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`
+        `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&country=PL&appid=${API_KEY}`
       );
       if (!response.ok) {
         if (response.status === 401) throw new Error('Problem z autoryzacją API.');
@@ -44,7 +47,7 @@ function App() {
   const fetchWeatherData = async (lat, lon) => {
     try {
       const response = await fetch(
-        `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&units=metric&appid=${API_KEY}`
+        `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&units=metric&lang=pl&appid=${API_KEY}`
       );
       if (!response.ok) {
         if (response.status === 401) throw new Error('Problem z autoryzacją API.');
@@ -58,63 +61,68 @@ function App() {
     }
   };
 
-  // Funkcja obsługująca kliknięcie "Szukaj" w SearchBar
+  // Obsługa wyszukiwania miasta (po kliknięciu "Szukaj" w SearchBar)
   const handleSearch = async (city) => {
-    setError('');  // czyszczenie poprzednich błędów
-    setWeatherData(null); // czyszczenie poprzednich danych pogodowych
+    setError('');           // reset poprzedniego błędu
+    setWeatherData(null);   // wyczyszczenie poprzednich danych pogodowych
     try {
       console.log(`Szukam miasta: ${city}`);
 
       let lat, lon;
-      // Caching współrzędnych miast - oszczędzanie API 
-      if (cityCache[city]) {
+      const safeCity = sanitizeCityName(city);  // oczyszczona nazwa miasta
+      // Sprawdzenie cache – jeśli to miasto było już wyszukiwane, użyj zapamiętanych współrzędnych
+      if (cityCache[safeCity]) {
         console.log('Miasto znalezione w cache.');
-        ({ lat, lon } = cityCache[city]);
+        ({ lat, lon } = cityCache[safeCity]);
       } else {
-        const safeCity = sanitizeCityName(city);
-        const coords = await fetchCoordinates(city);
+        const coords = await fetchCoordinates(safeCity);
         lat = coords.lat;
         lon = coords.lon;
-        cityCache[city] = { lat, lon };
+        cityCache[safeCity] = { lat, lon };
         console.log('Miasto zapisane do cache.');
       }
 
-      console.log(`Współrzędne dla ${city}: lat=${lat}, lon=${lon}`);
+      console.log(`Współrzędne dla "${safeCity}": lat=${lat}, lon=${lon}`);
       const weather = await fetchWeatherData(lat, lon);
       console.log('Otrzymane dane pogodowe:', weather);
-      setWeatherData(weather);  // Zapisanie danych do stanu React
+      setWeatherData(weather); // zapisanie pobranych danych pogodowych do stanu
+      setCityName(safeCity); // zapisanie nazwy miasta do stanu (do wyświetlenia)
     } catch (err) {
       console.error('Błąd:', err.message);
-      setError(err.message);  // Zapisanie błędu do stanu
+      setError(err.message); // zapisanie komunikatu błędu do stanu
     }
   };
 
   return (
     <div className="App">
-      {/* Górny pasek - SearchBar */}
+      {/* Górny pasek z tytułem i wyszukiwarką */}
       <div className="bg-blue-500 p-4">
         <h1 className="text-white text-2xl font-bold text-center">Weather App</h1>
         <SearchBar onSearch={handleSearch} />
       </div>
 
-      {/* Wyświetlanie błędu */}
+      {/* Komunikat błędu */}
       {error && <div className="text-red-500 text-center mt-4">{error}</div>}
 
-        {/* Wyświetlanie danych pogodowych */}
-        {weatherData && (
-        <div style={{ marginTop: '20px', textAlign: 'left', maxWidth: '', margin: '20px auto' }}>
-          <h2>Aktualna pogoda:</h2>
-          <pre>{JSON.stringify(weatherData.current, null, 2)}</pre>
+      {/* Sekcja aktualnej pogody i prognozy (renderowana po pobraniu danych) */}
+      {weatherData && (
+        <div className="mt-5">
+          {/* Bieżąca pogoda - użycie nowego komponentu */}
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold text-center mb-4">Aktualna pogoda</h2>
+            <CurrentWeather current={weatherData.current} city={cityName} />
+          </div>
 
-           {/* Sekcja 3-dniowej Prognozy */}
-           <div className="mt-8">
+
+          {/* Prognoza na 3 dni */}
+          <div className="mt-8">
             <h2 className="text-xl font-semibold text-center mb-4">Prognoza na 3 dni</h2>
             <WeatherForecast forecast={weatherData.daily.slice(0, 3)} />
           </div>
         </div>
-     )}
+      )}
 
-      {/* Dolny pasek */}
+      {/* Dolny pasek stopki */}
       <div className="bg-blue-500 p-4 mt-8">
         <p className="text-white text-center">© 2025 Weather App</p>
       </div>
