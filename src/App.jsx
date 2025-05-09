@@ -34,7 +34,7 @@ function App() {
         throw new Error('Błąd pobierania współrzędnych.');
       }
       const data = await response.json();
-      if (data.length === 0) {
+      if (data.length === 0 || data[0].country !== 'PL') {
         throw new Error('Nie znaleziono takiego miasta.');
       }
       return { lat: data[0].lat, lon: data[0].lon };
