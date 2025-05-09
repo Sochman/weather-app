@@ -15,3 +15,8 @@ body {
     padding: 20px;
   }
   
+  @media (max-width: 640px) {
+  .weather-forecast-container {
+    padding: 1rem;
+  }
+}
